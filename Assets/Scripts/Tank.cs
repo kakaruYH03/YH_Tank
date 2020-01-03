@@ -25,6 +25,7 @@ public class Tank : MonoBehaviour
     {
         speed = 10.0f;
         rotSpeed = 2.0f;
+        TargetPostion = transform.position;
     }
 
     private void Update()

@@ -13,7 +13,7 @@ public class LobbyPanelManager : PanelManager
 
     [SerializeField] ScrollRect scrollRect;
 
-    public enum LobbyState { None, Lobby, RoomNotReady, RoomReady }
+    public enum LobbyState { None, Lobby, RoomNotReady, RoomReady, Play }
     private LobbyState currentLobbyState = LobbyState.None;
     private LobbyState CurrentLobbyState
     {
@@ -36,6 +36,10 @@ public class LobbyPanelManager : PanelManager
 
                 case LobbyState.Lobby:
                     {
+
+                        // Lobby Panel 
+                        Show();
+
                         joinButton.interactable = true;
                         joinButton.gameObject.SetActive(true);
 
@@ -54,8 +58,8 @@ public class LobbyPanelManager : PanelManager
 
                         joinButton.gameObject.SetActive(false);
                         unReadyButton.gameObject.SetActive(false);
-                        
-                    break;
+
+                        break;
                     }
                 case LobbyState.RoomReady:
                     {
@@ -66,6 +70,20 @@ public class LobbyPanelManager : PanelManager
 
                         joinButton.gameObject.SetActive(false);
                         readyButton.gameObject.SetActive(false);
+                        break;
+                    }
+                case LobbyState.Play:
+                    {
+                        Hide();
+                        GameController gameController = GameObject.Find("GameController").GetComponent<GameController>();
+                        
+                        bool result = gameController.StartGame(clientInfo);
+
+                        if (!result)
+                        {
+                            // TODO: 오류 표시
+                        }
+
                         break;
                     }
             }
@@ -98,7 +116,8 @@ public class LobbyPanelManager : PanelManager
         socket.On("res_joinroom", EventJoinRoom);                       // 방에 참여했을때 호출
         socket.On("res_unjoinroom", EventUnJoinRoom);
         socket.On("res_ready", EventReady);
-        socket.On("res_unready", EventUnReady);
+        socket.On("res_unready", EventUnReady);                      //출
+        socket.On("res_play", EventPlay);                               // 게임 시작을 알리는 이벤트
 
         socket.On("res_otherjoinroom", EventOtherJoinRoom);             // 내방에 다른 누군가가 참여했을때 호출
         socket.On("res_otherunjoinroom", EventOtherUnJoinRoom);         // 내방에서 다른 누군가가 빠져나갔을때 호출
@@ -158,6 +177,11 @@ public class LobbyPanelManager : PanelManager
     {
         SetLog("준비취소");
         CurrentLobbyState = LobbyState.RoomNotReady;
+    }
+
+    private void EventPlay(SocketIOEvent e)
+    {
+        CurrentLobbyState = LobbyState.Play;
     }
 
     private void EventOtherJoinRoom(SocketIOEvent e)
