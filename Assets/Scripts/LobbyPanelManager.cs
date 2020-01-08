@@ -146,18 +146,23 @@ public class LobbyPanelManager : PanelManager
     private void EventJoinRoom(SocketIOEvent e)
     {
         string roomId = e.data.GetField("roomId").str;
-        string otherClientId = e.data.GetField("otherClientId").str;
+        JSONObject otherClientIds = e.data.GetField("otherClientIds");
         int clientsNumber = -1;
         e.data.GetField(ref clientsNumber, "clientsNumber");
 
         clientInfo.roomId = roomId;
-        SetLog("방에 참여함. RoomId: " + roomId + " (" + clientsNumber + "/2)");
-        SetLog("기존 유저 ID: " + otherClientId);
+        SetLog("방에 참여함. RoomId: " + roomId + " (" + clientsNumber + "/4)");
+        //SetLog("기존 유저 ID: " + otherClientId);
+        foreach (JSONObject o in otherClientIds.list)
+        {
+            SetLog("유저명: " + o.str);
+        }
+        SetLog("--------------------------");
 
         CurrentLobbyState = LobbyState.RoomNotReady;
 
     }
-
+    
     private void EventUnJoinRoom(SocketIOEvent e)
     {
         string roomId = e.data.GetField("roomId").str;

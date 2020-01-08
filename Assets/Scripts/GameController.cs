@@ -9,13 +9,13 @@ public class GameController : MonoBehaviour
     [SerializeField] GameObject tankPrefab;        // 탱크 Prefab
 
     private Tank playerTank;                       // 플레이어 탱크
-    private Tank otherTank;                        // 상대방 탱크
+    private Dictionary<string, Tank> otherTanks = new Dictionary<string, Tank>(); // 상대방 탱크들
 
     private float maxWidth = 100f;
     private float maxHeight = 100f;
 
     private SocketIOComponent socket;               // SocketIo 객체
-    private ClientInfo clientInfo;                  // Client ID & 
+    private ClientInfo clientInfo;                  // Client ID & RoomId
 
     public enum GameState { None, Play, Over,}
     private GameState currentState;
@@ -112,7 +112,9 @@ public class GameController : MonoBehaviour
         positionData.GetField(ref x, "x");
         positionData.GetField(ref z, "z");
 
-        otherTank = CreateTank(new Vector3(x, 0, z));
+        Tank otherTank = CreateTank(new Vector3(x, 0, z));
+        otherTanks.Add(clientId, otherTank);
+
     }
 
     private void EventOtherMoveTank(SocketIOEvent e)
@@ -125,6 +127,7 @@ public class GameController : MonoBehaviour
         positionData.GetField(ref x, "x");
         positionData.GetField(ref z, "z");
 
+        Tank otherTank = otherTanks[clientId];
         if (otherTank)
         {
             otherTank.TargetPostion = new Vector3(x, 0, z);
